@@ -1,12 +1,3 @@
-library(tidyverse)
-library(reshape2)
-library(lubridate)
-
-produkty <- read.csv("CENY_2917_CTAB_20200213211937.csv", sep = ";", dec=",", encoding = "UTF-8")
-
-df <- data.frame(produkty)
-
-
 #8. Mięso wieprzowe bez kości
 #18. Ser dojrzewający - za 1kg
 #21. Jaja kurze świerze (chów klatkowy lub ściółkowy) za 1 szt
@@ -17,10 +8,23 @@ df <- data.frame(produkty)
 #55. Olej napędowy - za 1l
 #58. Pasta do zębów
 
-df = subset(df, select = -c(Kod, Cena.i.wskaźniki, Jednostka.miary, Atrybut, X))
+data <- dir(path='dane', pattern = '*.csv', full.names="TRUE", recursive="FALSE")
 
-grouped = group_by(df, Rodzaje.towarów.i.usług, Nazwa)
+for (i in 1:length(dane)) {
+  data <- read.csv(dane[i], sep=";")
+  data_list[[i]] = data
+}
+data_frame <- do.call(rbind, data_list)
 
-ordered = grouped[order(grouped$Nazwa, grouped$Rok, grouped$Rodzaje.towarów.i.usług), ]
-ordered = transform(ordered, Wartosc = as.numeric(sub(',', '.', as.character(Wartosc))))
+grouped_data_frame <- data_frame %>% group_by(Rodzaje.towarów.i.usług, Nazwa)
+
+ordered <- data_frame[
+  order(
+    data_frame$Nazwa, 
+    data_frame$Rok, 
+    data_frame$Rodzaje.towarów.i.usług
+  ), 
+  ]
+
+clear_data <- ordered[c('Nazwa', 'Miesiące', 'Rodzaje.towarów.i.usług', 'Rok', 'Wartosc')]
 
